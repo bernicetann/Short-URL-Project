@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>TinyApp</title>
+  <% include partials/_header.ejs %>
+</head>
+<body>
+  <h1>URLs</h1>
+    <ul>
+      <% for (var i in urls) { %>
+        <li>
+          <%= i %> - <%= urls[i] %>
+        </li>
+      <% } %>
+    </ul>
+  <h2>Delete</h2>
+  <ul>
+    <% for (var i in urls) { %>
+      <li>
+        <%= i %> - <%= urls[i] %>
+        <form action="/urls/<%= i %>/delete" method="post">
+          <button> DELETE </button>
+        </form>
+        <form action="/urls/<%= i %>" method="get">
+          <button> EDIT </button>
+        </form>
+      </li>
+    <% } %>
+  </ul>
+
+</body>
+</html>
