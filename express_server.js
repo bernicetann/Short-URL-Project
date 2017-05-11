@@ -11,11 +11,28 @@ app.set("view engine", "ejs")
 //Middlewares
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
+app.use((req, res, next) => {
+  res.locals.username = req.cookies.username;
+  next();
+});
 
-//URL Routes
+//Databases
 var urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
+};
+
+const users = {
+  "user1RandomID": {
+    id: "user1RandomID",
+    email: "user1@example.com",
+    password: "purple-monkey-dinosaur"
+  },
+  "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk"
+  }
 };
 
 app.get("/urls.json", (req, res) => {
@@ -24,8 +41,8 @@ app.get("/urls.json", (req, res) => {
 
 //Lists urls/homepage
 app.get("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase,
-                       username: req.cookies["username"] };
+  let templateVars = { urls: urlDatabase };
+                       // username: req.cookies["username"] };
   res.render("urls_index", templateVars);
 });
 
@@ -44,7 +61,7 @@ app.post("/urls", (req, res) => {
 function generateRandomString() {
   var text = "";
   var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  for (var i = 0; i < 5; i++)
+  for (var i = 0; i < 6; i++)
     text = text + possible.charAt(Math.floor(Math.random() * possible.length));
   return text;
 }
@@ -86,6 +103,23 @@ app.post("/login", (req, res) => {
 //Logout
 app.post("/logout", (req, res) => {
   res.clearCookie('username');
+  res.redirect('/urls');
+});
+
+//Register
+app.get("/register", (req, res) => {
+
+  res.render('urls_register');
+});
+
+app.post("/register", (req, res) => {
+  let newId = req.body.username;
+  let email = req.body.email;
+  let password = req.body.password;
+  users[newId] = { id: newId,
+                   email: email,
+                   password: password };
+  res.cookie('username', newId);
   res.redirect('/urls');
 });
 
