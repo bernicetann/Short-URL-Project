@@ -22,13 +22,13 @@ var urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
-const users = {
-  "user1RandomID": {
+let users = {
+  user1RandomID: {
     id: "user1RandomID",
     email: "user1@example.com",
     password: "purple-monkey-dinosaur"
   },
-  "user2RandomID": {
+  user2RandomID: {
     id: "user2RandomID",
     email: "user2@example.com",
     password: "dishwasher-funk"
@@ -100,6 +100,10 @@ app.post("/login", (req, res) => {
   res.redirect('/urls');
 });
 
+app.get("/login", (req, res) => {
+  res.render('urls_login');
+});
+
 //Logout
 app.post("/logout", (req, res) => {
   res.clearCookie('username');
@@ -112,16 +116,32 @@ app.get("/register", (req, res) => {
   res.render('urls_register');
 });
 
-app.post("/register", (req, res) => {
-  let newId = req.body.username;
-  let email = req.body.email;
-  let password = req.body.password;
+app.post("/register", (req, res) => {      //TODO: find why if statement is not working
+  let newId = req.body.username;           //TODO: find() loop?
+  let newEmail = req.body.email;
+  let newPassword = req.body.password;
   users[newId] = { id: newId,
-                   email: email,
-                   password: password };
+                   email: newEmail,
+                   password: newPassword };
   res.cookie('username', newId);
+  if (!newEmail || !newPassword) {
+    res.status(400);
+    res.send("STATUS 400: Username/Password is empty");
+    return;
+  // } else if()
   res.redirect('/urls');
+}
 });
+
+var searchUserEmail = function(obj) {
+  for(var prop in obj) {
+    console.log(typeof(prop));
+    // console.log(userId[email]);
+  }
+
+};
+
+searchUserEmail(users);
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
