@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <h1>TinyURL</h1>
+  </head>
+  <hr></hr>
+<body style="font-size:20px; padding:50px;">
+  <h2>Login</h2>
+  <% if(locals.username) { %>
+    <%= locals.username %> is logged in.
+    <form action="/logout" method="POST">
+      <button> LOGOUT </button>
+    </form>
+  <% } else { %>
+    <form action="/login" method="POST">
+      <p><label for="Email"></label>
+          Email:
+        <input id="email" type="email" name="email" style="width: 300px"></p>
+      <p><label for="Password"></label>
+          Password:
+        <input id="password" type="text" name="password" style="width: 300px"></p>
+      <p><input type="submit" value="Login"></p>
+    </form>
+    <form action="/register" method="GET">
+      <button>Register</button>
+    </form>
+  <% } %>
+</body>
+</html>
