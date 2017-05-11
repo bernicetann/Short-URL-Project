@@ -1,25 +1,20 @@
 
 <!DOCTYPE html>
 <html lang="en">
-  <head><% include partials/_header %></head>
+  <head></head>
   <body style="font-size:20px; padding:50px;">
-    <h1>
-      Short URL:<%= shortURL %>
-    </h1>
-    <h2>
-      Update your URL:
-    </h2>
+    <% include partials/_header %>
+    <p>
+      Your short URL comes out to be. . . <%= shortURL %> </p>
+    </p>
+    <div>
     <form action="/urls/<%= shortURL %>" method="POST" style="margin:150px;">
+      <p>Update you URL:</p>
       <input id="longURL" type="text" name="updatedURL" placeholder="http://"
       style="width: 300px">
       <input type="submit" value="Update">
     </form>
+    </div>
   </body>
 </html>
 
-
-<!-- We start by extending at the urls_show.ejs template to include a form with two elements – a text input and a button.
-
-Similar to the previous exercise, where you implemented URL deleting, the form will submit using a POST request.
-
-Add a form to the urls_show template that submits an updated long URL -->

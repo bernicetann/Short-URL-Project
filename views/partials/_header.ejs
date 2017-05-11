@@ -1,18 +1,18 @@
+<h1>Tiny App</h1>
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<h1>
-  PROJECT 101
-</h1>
+<% if(locals.username) { %>
+  <%= locals.username %> is logged in.
+  <form action="/logout" method="POST">
+    <button> LOGOUT </button>
+  </form>
+<% } else { %>
+  <form action="/login" method="POST">
+    <input id="login" type="text" name="username" style="width:300px">
+    <input type="submit" value="Login">
+  </form>
+  <form action="/register" method="GET">
+    <button>Register</button>
+  </form>
+<% } %>
 
-<form action="/login" method="POST" style="margin:150px;">
-  <input id="username" type="text" name="username" style="width:300px">
-
-  <input type="submit" value="Login">
-</form>
-  <p1>
-    <%= username %>
-  </p1>
-</head>
-</html>
+<hr></hr>

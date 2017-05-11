@@ -1,11 +1,14 @@
+
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <title>TinyApp</title>
-  <% include partials/_header.ejs %>
 </head>
 <body>
-  <h1>URLs</h1>
+  <% include partials/_header.ejs %>
+  <h1><a href="http://localhost:8080/urls/new">Create a New Short Link</a></h1>
+  <h2>URLs</h2>
     <ul>
       <% for (var i in urls) { %>
         <li>
@@ -13,20 +16,23 @@
         </li>
       <% } %>
     </ul>
-  <h2>Delete</h2>
-  <ul>
-    <% for (var i in urls) { %>
-      <li>
-        <%= i %> - <%= urls[i] %>
-        <form action="/urls/<%= i %>/delete" method="post">
-          <button> DELETE </button>
-        </form>
-        <form action="/urls/<%= i %>" method="get">
-          <button> EDIT </button>
-        </form>
-      </li>
-    <% } %>
-  </ul>
-
+  <h3>Delete Or Edit</h3>
+    <ul>
+      <% for (var i in urls) { %>
+        <li>
+          <%= i %> - <%= urls[i] %>
+          <form action="/urls/<%= i %>/delete" method="post">
+            <button> DELETE </button>
+          </form>
+          </form action="/urls/<%= i %>" method="GET">
+            <button> EDIT </button>
+          </form>
+        </li>
+      <% } %>
+    </ul>
 </body>
 </html>
+
+
+
+
