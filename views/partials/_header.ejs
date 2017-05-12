@@ -1,7 +1,7 @@
 <h1>TinyURL</h1>
 
-<% if(locals.username) { %>
-  <%= locals.username %> is logged in.
+<% if(locals.user_id) { %>
+  <%= locals.user_id %> is logged in.
   <form action="/logout" method="POST">
     <button> LOGOUT </button>
   </form>

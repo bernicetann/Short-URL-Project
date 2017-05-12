@@ -14,7 +14,7 @@ app.set("view engine", "ejs")
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 app.use((req, res, next) => {
-  res.locals.username = req.cookies.username;
+  res.locals.user_id = req.cookies.user_id;
   next();
 });
 
@@ -37,20 +37,43 @@ let users = {
   }
 };
 
+//Helpers
+// const emailExists = newEmail => email === newEmail;
+const emailExists = function(newEmail) {
+  for(var user in users) {
+    if(users[user].email === newEmail) {
+    return true;
+    }
+  }
+  return false;
+}
+
+function findUser(email) {
+  for (var id in users) {
+    if (users[id].email === email) {
+      return users[id];
+    }
+  }
+}
+
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
 //Lists urls/homepage
+app.get("/", (req, res) => {
+  res.end("Welcome!");
+});
+
 app.get("/urls", (req, res) => {
   let templateVars = { urls: urlDatabase };
-                       // username: req.cookies["username"] };
+                       // user_id: req.cookies["user_id"] };
   res.render("urls_index", templateVars);
 });
 
 //Gives you a random generated 6 alphanumeric variable for a long URL
 app.get("/urls/new", (req, res) => {
-  let templateVars = { username: req.cookies["username"] };
+  let templateVars = { user_id: req.cookies["user_id"] };
   res.render("urls_new", templateVars);
 });
 
@@ -64,7 +87,7 @@ app.post("/urls", (req, res) => {
 app.get("/urls/:id", (req, res) => {
   let templateVars = { shortURL: req.params.id,
                        longURL: urlDatabase[req.params.id],
-                       username: req.cookies["username"] };
+                       user_id: req.cookies["user_id"] };
   res.render("urls_show", templateVars);
 });
 
@@ -100,7 +123,7 @@ app.post("/login", (req, res) => {
     res.status(403);
     res.send("STATUS 403: User with that password does not match");
   } else {
-    res.cookie('user_id', req.body.username);
+    res.cookie('user_id', req.body.user_id);
     res.redirect('/');
   }
 });
@@ -122,61 +145,30 @@ app.get("/register", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
-  let newId = req.body.username;
+  // let newId = req.body.user_id;
+  let newId = generateRandomString();
   let newEmail = req.body.email;
   let newPassword = req.body.password;
-  users[newId] = { id: newId,
-                   email: newEmail,
-                   password: newPassword };
-
-  res.cookie('user_id', newId);
   const emailDoesExist = emailExists(newEmail);
-
   if (!newEmail || !newPassword) {
     res.status(400);
-    res.send("STATUS 400: Username/Password is empty");
+    res.send("STATUS 400: user_id/Password is empty");
   } else if (emailDoesExist) {
     res.status(400);
     res.send("STATUS 400: This e-mail already exists");
   }
+   users[newId] = { id: newId,
+                   email: newEmail,
+                   password: newPassword };
+  res.cookie('user_id', newId);
   res.redirect('/urls');
 });
-
-// const emailExists = newEmail => email === newEmail;
-const emailExists = function(newEmail) {
-  for(var user in users) {
-    if(users[user].email === newEmail) {
-    return true;
-    }
-  }
-  return false;
-}
-
-// var userPasswordArray = function(users) {
-//   const registeredPasswords = [];
-//   for(var user in users) {
-//     registeredPasswords.push(users[user].password);
-//   }
-//   return registeredPasswords;
-// };
 
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
-// TODO : there's some crazy bug when I change the url to 'lighthouselabs.ca' and then try the redirect link
-
-
-/// -- Helpers -- //
-
-function findUser(email) {
-  for (var id in users) {
-    if (users[id].email === email) {
-      return users[id];
-    }
-  }
-}
 
 
 

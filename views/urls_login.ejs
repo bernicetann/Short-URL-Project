@@ -6,8 +6,8 @@
   <hr></hr>
 <body style="font-size:20px; padding:50px;">
   <h2>Login</h2>
-  <% if(locals.username) { %>
-    <%= locals.username %> is logged in.
+  <% if(locals.user_id) { %>
+    <%= locals.user_id %> is logged in.
     <form action="/logout" method="POST">
       <button> LOGOUT </button>
     </form>
