@@ -90,13 +90,19 @@ app.post("/urls/:id", (req, res) => {
 
 //Login
 app.post("/login", (req, res) => {
-  res.cookie('user_id', req.body.username);
-  for(var user in users) {
-    return
+  const userEmail = req.body.email;
+  const userPassword = req.body.password;
+  const user = findUser(userEmail);
+  if (!user) {
+    res.status(403);
+    res.send("STATUS 403: User with that e-mail cannot be found");
+  } else if (user.password !== userPassword) {
+    res.status(403);
+    res.send("STATUS 403: User with that password does not match");
+  } else {
+    res.cookie('user_id', req.body.username);
+    res.redirect('/');
   }
-  //Task 9: if user does not match email respond with 403
-  //if matched, compare email with password
-  res.redirect('/urls');
 });
 
 app.get("/login", (req, res) => {
@@ -146,13 +152,13 @@ const emailExists = function(newEmail) {
   return false;
 }
 
-var userPasswordArray = function(users) {
-  const registeredPasswords = [];
-  for(var user in users) {
-    registeredPasswords.push(users[user].password);
-  }
-  return registeredPasswords;
-};
+// var userPasswordArray = function(users) {
+//   const registeredPasswords = [];
+//   for(var user in users) {
+//     registeredPasswords.push(users[user].password);
+//   }
+//   return registeredPasswords;
+// };
 
 
 app.listen(PORT, () => {
@@ -162,7 +168,15 @@ app.listen(PORT, () => {
 // TODO : there's some crazy bug when I change the url to 'lighthouselabs.ca' and then try the redirect link
 
 
+/// -- Helpers -- //
 
+function findUser(email) {
+  for (var id in users) {
+    if (users[id].email === email) {
+      return users[id];
+    }
+  }
+}
 
 
 
