@@ -6,6 +6,7 @@ const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const helpers = require('./helpers/helperfunctions');
 const generateRandomString = helpers.generatedRand;
+const bcrypt = require('bcrypt');
 
 //Let's us use ejs
 app.set("view engine", "ejs")
@@ -19,12 +20,15 @@ app.use((req, res, next) => {
 });
 
 //Databases
-var urlDatabase =  {"b2xVn2": {userID: "user1RandomID",
-                               url: "http://www.lighthouselabs.ca"},
-                    "9sm5xK": {userID: "user2RandomID",
-                               url: "http://www.google.com"
-                              }
-                    };
+var urlDatabase =  {
+  "b2xVn2": {
+    userID: "user1RandomID",
+    url: "http://www.lighthouselabs.ca"
+  },
+  "9sm5xK": {userID: "user2RandomID",
+             url: "http://www.google.com"
+            }
+  };
 
 let users = {
   user1RandomID: {
@@ -44,7 +48,7 @@ let users = {
 const emailExists = function(newEmail) {
   for(var user in users) {
     if(users[user].email === newEmail) {
-    return true;
+      return true;
     }
   }
   return false;
@@ -157,7 +161,7 @@ app.post("/login", (req, res) => {
   if (!user) {
     res.status(403);
     res.send("STATUS 403: User with that e-mail cannot be found");
-  } else if (user.password !== userPassword) {
+  } else if (bcrypt.compareSync(userPassword, user.password)) {
     res.status(403);
     res.send("STATUS 403: User with that password does not match");
   } else {
@@ -186,9 +190,10 @@ app.post("/register", (req, res) => {
   // let newId = req.body.user_id;
   let newId = generateRandomString();
   let newEmail = req.body.email;
-  let newPassword = req.body.password;
+  let password = req.body.password;
+  const hashed_password = bcrypt.hashSync(password, 10);
   const emailDoesExist = emailExists(newEmail);
-  if (!newEmail || !newPassword) {
+  if (!newEmail || !password) {
     res.status(400);
     res.send("STATUS 400: user_id/Password is empty");
   } else if (emailDoesExist) {
@@ -197,7 +202,7 @@ app.post("/register", (req, res) => {
   }
    users[newId] = { id: newId,
                    email: newEmail,
-                   password: newPassword };
+                   password: hashed_password };
   res.cookie('user_id', newId);
   res.redirect('/urls');
 });
