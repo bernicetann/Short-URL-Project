@@ -58,6 +58,17 @@ function findUser(email) {
   }
 }
 
+function urlsForUser(id) {
+  var userData = {};
+  for(var shortURL in urlDatabase) {
+    if(id === urlDatabase[shortURL].userID) {
+      userData[shortURL] = urlDatabase[shortURL];
+    }
+  }
+  return userData;
+}
+
+//GET/POST
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
@@ -68,9 +79,13 @@ app.get("/", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  let templateVars = { urls: urlDatabase };
-                       // user_id: req.cookies["user_id"] };
-  res.render("urls_index", templateVars);
+  let templateVars = { urls: urlsForUser(req.cookies["user_id"]),
+                       user_id: req.cookies["user_id"] };
+  if(!templateVars.user_id) {
+    res.send("You are not logged in.");
+    } else {
+    res.render("urls_index", templateVars);
+  }
 });
 
 //Gives you a random generated 6 alphanumeric variable for a long URL
@@ -94,7 +109,11 @@ app.get("/urls/:id", (req, res) => {
   let templateVars = { shortURL: req.params.id,
                        longURL: urlDatabase[req.params.id],
                        user_id: req.cookies["user_id"] };
+  if(!templateVars.user_id) {
+    res.send("You need to be logged in.")
+  } else {
   res.render("urls_show", templateVars);
+  }
 });
 
 //Routes to the longURL using shortURL
@@ -106,16 +125,26 @@ app.get("/u/:shortURL", (req, res) => {
 
 //Delete a URL resource
 app.post("/urls/:id/delete", (req, res) => {
-  delete urlDatabase[req.params.id];
-  res.redirect('/urls');
+  let templateVars = { user_id: req.cookies["user_id"] };
+  if(templateVars.user_id) {
+    delete urlDatabase[req.params.id];
+    res.redirect('/urls');
+  } else {
+    res.redirect('/login');
+  }
 })
 
-//Update URLs
+//Edit URLs
 app.post("/urls/:id", (req, res) => {
-  let shortURL = req.params.id
-  urlDatabase[shortURL] = req.body.updatedURL;
-  res.redirect('/urls');
-})
+  let templateVars = { user_id: req.cookies["user_id"] };
+  if(templateVars.user_id) {
+    let shortURL = req.params.id
+    urlDatabase[shortURL] = req.body.updatedURL;
+    res.redirect('/urls');
+  } else {
+    res.redirect('/login');
+  }
+});
 
 //Login
 app.post("/login", (req, res) => {
