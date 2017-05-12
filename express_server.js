@@ -19,10 +19,12 @@ app.use((req, res, next) => {
 });
 
 //Databases
-var urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
-};
+var urlDatabase =  {"b2xVn2": {userID: "user1RandomID",
+                               url: "http://www.lighthouselabs.ca"},
+                    "9sm5xK": {userID: "user2RandomID",
+                               url: "http://www.google.com"
+                              }
+                    };
 
 let users = {
   user1RandomID: {
@@ -74,7 +76,11 @@ app.get("/urls", (req, res) => {
 //Gives you a random generated 6 alphanumeric variable for a long URL
 app.get("/urls/new", (req, res) => {
   let templateVars = { user_id: req.cookies["user_id"] };
-  res.render("urls_new", templateVars);
+  if (!templateVars.user_id) {
+    res.redirect("/login");
+  } else {
+    res.render("urls_new", templateVars);
+  }
 });
 
 app.post("/urls", (req, res) => {
@@ -123,7 +129,7 @@ app.post("/login", (req, res) => {
     res.status(403);
     res.send("STATUS 403: User with that password does not match");
   } else {
-    res.cookie('user_id', req.body.user_id);
+    res.cookie('user_id', user.id);
     res.redirect('/');
   }
 });
