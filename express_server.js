@@ -4,6 +4,8 @@ var app = express();
 var PORT = process.env.PORT || 8080; // default port 8080
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
+const helpers = require('./helpers/helperfunctions');
+const generateRandomString = helpers.generatedRand;
 
 //Let's us use ejs
 app.set("view engine", "ejs")
@@ -58,14 +60,6 @@ app.post("/urls", (req, res) => {
   res.redirect(`urls/${generateNumbers}`);
 });
 
-function generateRandomString() {
-  var text = "";
-  var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  for (var i = 0; i < 6; i++)
-    text = text + possible.charAt(Math.floor(Math.random() * possible.length));
-  return text;
-}
-
 //Routes to shortURL
 app.get("/urls/:id", (req, res) => {
   let templateVars = { shortURL: req.params.id,
@@ -96,7 +90,12 @@ app.post("/urls/:id", (req, res) => {
 
 //Login
 app.post("/login", (req, res) => {
-  res.cookie('username', req.body.username);
+  res.cookie('user_id', req.body.username);
+  for(var user in users) {
+    return
+  }
+  //Task 9: if user does not match email respond with 403
+  //if matched, compare email with password
   res.redirect('/urls');
 });
 
@@ -106,7 +105,7 @@ app.get("/login", (req, res) => {
 
 //Logout
 app.post("/logout", (req, res) => {
-  res.clearCookie('username');
+  res.clearCookie('user_id');
   res.redirect('/urls');
 });
 
@@ -116,32 +115,45 @@ app.get("/register", (req, res) => {
   res.render('urls_register');
 });
 
-app.post("/register", (req, res) => {      //TODO: find why if statement is not working
-  let newId = req.body.username;           //TODO: find() loop?
+app.post("/register", (req, res) => {
+  let newId = req.body.username;
   let newEmail = req.body.email;
   let newPassword = req.body.password;
   users[newId] = { id: newId,
                    email: newEmail,
                    password: newPassword };
-  res.cookie('username', newId);
+
+  res.cookie('user_id', newId);
+  const emailDoesExist = emailExists(newEmail);
+
   if (!newEmail || !newPassword) {
     res.status(400);
     res.send("STATUS 400: Username/Password is empty");
-    return;
-  // } else if()
+  } else if (emailDoesExist) {
+    res.status(400);
+    res.send("STATUS 400: This e-mail already exists");
+  }
   res.redirect('/urls');
-}
 });
 
-var searchUserEmail = function(obj) {
-  for(var prop in obj) {
-    console.log(typeof(prop));
-    // console.log(userId[email]);
+// const emailExists = newEmail => email === newEmail;
+const emailExists = function(newEmail) {
+  for(var user in users) {
+    if(users[user].email === newEmail) {
+    return true;
+    }
   }
+  return false;
+}
 
+var userPasswordArray = function(users) {
+  const registeredPasswords = [];
+  for(var user in users) {
+    registeredPasswords.push(users[user].password);
+  }
+  return registeredPasswords;
 };
 
-searchUserEmail(users);
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
