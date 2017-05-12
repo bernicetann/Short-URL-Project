@@ -82,7 +82,7 @@ app.get("/urls", (req, res) => {
   let templateVars = { urls: urlsForUser(req.cookies["user_id"]),
                        user_id: req.cookies["user_id"] };
   if(!templateVars.user_id) {
-    res.send("You are not logged in.");
+    res.send("Unauthorized. You are not logged in.");
     } else {
     res.render("urls_index", templateVars);
   }
@@ -100,7 +100,9 @@ app.get("/urls/new", (req, res) => {
 
 app.post("/urls", (req, res) => {
   var generateNumbers = generateRandomString();
-  urlDatabase[generateNumbers] = req.body.longURL;
+  urlDatabase[generateNumbers] = { userID: req.cookies["user_id"],
+                                   url: req.body.longURL };
+  console.log(urlDatabase);
   res.redirect(`urls/${generateNumbers}`);
 });
 
@@ -110,16 +112,17 @@ app.get("/urls/:id", (req, res) => {
                        longURL: urlDatabase[req.params.id],
                        user_id: req.cookies["user_id"] };
   if(!templateVars.user_id) {
-    res.send("You need to be logged in.")
+    res.send("Unauthorized. You need to be logged in.")
+  } else if(templateVars.user_id !== urlDatabase[req.params.id].userID) {
+    res.send("Unauthorized. User does not match");
   } else {
-  res.render("urls_show", templateVars);
+    res.render("urls_show", templateVars);
   }
 });
 
 //Routes to the longURL using shortURL
 app.get("/u/:shortURL", (req, res) => {
-  console.log("getting URL for ", req.params.shortURL)
-  let longURL = urlDatabase[req.params.shortURL];
+  let longURL = urlDatabase[req.params.shortURL].url;
   res.redirect(longURL);
 });
 
