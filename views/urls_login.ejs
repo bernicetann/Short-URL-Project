@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <h1>TinyURL</h1>
+    <title>Login</title>
   </head>
-  <hr></hr>
 <body style="font-size:20px; padding:50px;">
-  <h2>Login</h2>
+  <h1>TinyApp Login</h1>
+  <hr></hr>
   <% if(locals.user_id) { %>
     <%= locals.user_id %> is logged in.
     <form action="/logout" method="POST">
@@ -18,7 +18,7 @@
         <input id="email" type="email" name="email" style="width: 300px"></p>
       <p><label for="Password"></label>
           Password:
-        <input id="password" type="text" name="password" style="width: 300px"></p>
+        <input id="password" type="password" name="password" style="width: 300px"></p>
       <p><input type="submit" value="Login"></p>
     </form>
     <form action="/register" method="GET">

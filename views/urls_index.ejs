@@ -3,28 +3,20 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <title>TinyApp</title>
+  <title>URL List</title>
 </head>
-<body>
+<body style="font-size:20px; padding:50px;">
   <% include partials/_header.ejs %>
-  <h1><a href="http://localhost:8080/urls/new">Create a New Short Link</a></h1>
-  <h2>URLs</h2>
+  <p><a href="http://localhost:8080/urls/new">Create a New Short Link</a></p>
+  <p>URL List</p>
     <ul>
       <% for (var i in urls) { %>
         <li>
-          <%= i %> - <%= urls[i] %>
-        </li>
-      <% } %>
-    </ul>
-  <h3>Delete Or Edit</h3>
-    <ul>
-      <% for (var i in urls) { %>
-        <li>
-          <%= i %> - <%= urls[i] %>
+          <%= i %>      -      <%= urls[i].url %>
           <form action="/urls/<%= i %>/delete" method="post">
             <button> DELETE </button>
           </form>
-          </form action="/urls/<%= i %>" method="GET">
+          <form action="/urls/<%= i %>" method="GET">
             <button> EDIT </button>
           </form>
         </li>
