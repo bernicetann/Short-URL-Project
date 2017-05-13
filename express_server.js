@@ -150,7 +150,7 @@ app.get("/urls/:id", (req, res) => {
     }
     res.status(400).send("Bad Request. That URL does not exist.");
   }
- });
+});
 
 //Routes to the longURL using shortURL
 app.get("/u/:id", (req, res) => {
@@ -159,7 +159,7 @@ app.get("/u/:id", (req, res) => {
     let longURL = urlDatabase[req.params.id].url;
     res.redirect(longURL);
   } else {
-    res.status(400).send("Error. Bad Request. This Url does not exist.")
+    res.status(400).send("Error. Bad Request. This Url does not exist.");
   }
 });
 
@@ -189,9 +189,9 @@ app.post("/urls/:id", (req, res) => {
     if(urlDatabase[shortURL].req.session["user_id"] !== req.session["user_id"]) {
       res.status(401).send("Unauthorized. User does not own URL for given Id.");
     } else {
-    res.redirect('/login');
-  }
-  res.status(401).send("Unauthorized. User is not logged in.");
+      res.redirect('/login');
+    }
+    res.status(401).send("Unauthorized. User is not logged in.");
   }
 });
 
