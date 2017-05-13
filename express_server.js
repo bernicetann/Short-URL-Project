@@ -18,7 +18,7 @@ app.use(cookieSession({
   keys: ['key1']
 }));
 app.use((req, res, next) => {
-  res.locals.user_id = req.session.user_id;
+  res.locals.user = users[req.session.user_id];
   next();
 });
 
@@ -34,7 +34,7 @@ var urlDatabase =  {
   }
 };
 
-let users = {
+var users = {
   user1RandomID: {
     id: "user1RandomID",
     email: "user1@example.com",
@@ -76,6 +76,16 @@ function urlsForUser(id) {
   return userData;
 }
 
+function validUrl(shortURL) {
+  let validity = false;
+  for(let key in urlDatabase) {
+    if(key === shortURL) {
+      validity = true;
+    }
+  }
+  return validity;
+}
+
 //GET/POST
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
@@ -96,7 +106,7 @@ app.get("/urls", (req, res) => {
     user_id: req.session["user_id"]
   };
   if(!templateVars.user_id) {
-    res.send("Unauthorized. You are not logged in.");
+    res.status(401).send("Unauthorized. You are not logged in.");
   } else {
     res.render("urls_index", templateVars);
   }
@@ -126,31 +136,45 @@ app.post("/urls", (req, res) => {
 app.get("/urls/:id", (req, res) => {
   let templateVars = {
     shortURL: req.params.id,
-    longURL: urlDatabase[req.params.id],
+    longURL: urlDatabase[req.params.id].url,
     user_id: req.session["user_id"]
   };
-  if(!templateVars.user_id) {
-    res.send("Unauthorized. You need to be logged in.");
-  } else if(templateVars.user_id !== urlDatabase[req.params.id].userID) {
-    res.send("Unauthorized. User does not match");
-  } else {
-    res.render("urls_show", templateVars);
+  let urlExists = validUrl(req.params.id);
+  if(urlExists) {
+    if(!req.session["user_id"]) {
+      res.status(401).send("Unauthorized. You need to be logged in.");
+    } else if(req.session["user_id"] !== urlDatabase[req.params.id].userID) {
+      res.status(401).send("Unauthorized. User does not match");
+    } else {
+      res.render("urls_show", templateVars);
+    }
+    res.status(400).send("Bad Request. That URL does not exist.");
   }
-});
+ });
 
 //Routes to the longURL using shortURL
-app.get("/u/:shortURL", (req, res) => {
-  let longURL = urlDatabase[req.params.shortURL].url;
-  res.redirect(longURL);
+app.get("/u/:id", (req, res) => {
+  let urlExists = validUrl(req.params.id);
+  if(urlExists) {
+    let longURL = urlDatabase[req.params.id].url;
+    res.redirect(longURL);
+  } else {
+    res.status(400).send("Error. Bad Request. This Url does not exist.")
+  }
 });
 
 //Delete a URL resource
 app.post("/urls/:id/delete", (req, res) => {
   let templateVars = { user_id: req.session["user_id"] };
-  if(templateVars.user_id) {
+  if(req.session["user_id"]) {
     delete urlDatabase[req.params.id];
     res.redirect('/urls');
+    if(urlDatabase[req.params.id].req.session["user_id"] !== req.session["user_id"]) {
+      res.status(401).send("Error. Unauthorized. User does not own Url for given Id.");
+    }
   } else {
+    res.status(401);
+    // res.send("Error. Unauthorized. User is not logged in.");
     res.redirect('/login');
   }
 });
@@ -158,12 +182,16 @@ app.post("/urls/:id/delete", (req, res) => {
 //Edit URLs
 app.post("/urls/:id", (req, res) => {
   let templateVars = { user_id: req.session["user_id"] };
-  if(templateVars.user_id) {
+  if(req.session["user_id"]) {
     let shortURL = req.params.id;
-    urlDatabase[shortURL] = req.body.updatedURL;
+    urlDatabase[shortURL].url = req.body.updatedURL;
     res.redirect('/urls');
-  } else {
+    if(urlDatabase[shortURL].req.session["user_id"] !== req.session["user_id"]) {
+      res.status(401).send("Unauthorized. User does not own URL for given Id.");
+    } else {
     res.redirect('/login');
+  }
+  res.status(401).send("Unauthorized. User is not logged in.");
   }
 });
 
@@ -180,7 +208,7 @@ app.post("/login", (req, res) => {
     res.send("STATUS 403: User with that password does not match");
   } else {
     req.session.user_id = user.id;
-    res.redirect('/');
+    res.redirect('/urls');
   }
 });
 
@@ -196,7 +224,6 @@ app.post("/logout", (req, res) => {
 
 //Register
 app.get("/register", (req, res) => {
-
   res.render('urls_register');
 });
 
