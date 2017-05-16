@@ -7,7 +7,7 @@
   <body style="font-size:20px; padding:50px;">
     <% include partials/_header %>
     <p>
-      <%= shortURL %> - <%= longURL %>
+      <a href="/u/<%= shortURL %>"><%= shortURL %></a> - <%= longURL %>
     </p>
     <div>
     <form action="/urls/<%= shortURL %>" method="POST" style="margin:150px;">

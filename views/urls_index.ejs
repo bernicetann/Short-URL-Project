@@ -7,18 +7,20 @@
 </head>
 <body style="font-size:20px; padding:50px;">
   <% include partials/_header.ejs %>
-  <p><a href="http://localhost:8080/urls/new">Create a New Short Link</a></p>
+  <a href="/urls/new">
+    <button>Create New Url Link</button>
+  </a>
   <p>URL List</p>
     <ul>
       <% for (var i in urls) { %>
         <li>
-          <%= i %>      -      <%= urls[i].url %>
-          <form action="/urls/<%= i %>/delete" method="post">
+          <a href="u/<%= i %>"><%= i %></a>      -      <%= urls[i].url %>
+          <form action="/urls/<%= i %>/delete" method ="POST">
             <button> DELETE </button>
           </form>
-          <form action="/urls/<%= i %>" method="GET">
+          <a href="/urls/<%= i %>">
             <button> EDIT </button>
-          </form>
+          </a>
         </li>
       <% } %>
     </ul>
