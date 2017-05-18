@@ -48,7 +48,6 @@ var users = {
 };
 
 //Helpers
-// const emailExists = newEmail => email === newEmail;
 const emailExists = function(newEmail) {
   for(var user in users) {
     if(users[user].email === newEmail) {
@@ -59,8 +58,8 @@ const emailExists = function(newEmail) {
 };
 
 function findUser(email) {
-  for (var id in users) {
-    if (users[id].email === email) {
+  for(var id in users) {
+    if(users[id].email === email) {
       return users[id];
     }
   }
@@ -86,7 +85,6 @@ function validUrl(shortURL) {
   return validity;
 }
 
-//GET/POST
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
@@ -115,7 +113,7 @@ app.get("/urls", (req, res) => {
 //Gives you a random generated 6 alphanumeric variable for a long URL
 app.get("/urls/new", (req, res) => {
   let templateVars = { user_id: req.session["user_id"] };
-  if (!templateVars.user_id) {
+  if(!templateVars.user_id) {
     res.redirect("/login");
   } else {
     res.render("urls_new", templateVars);
@@ -128,26 +126,29 @@ app.post("/urls", (req, res) => {
     userID: req.session["user_id"],
     url: req.body.longURL
   };
-  console.log(urlDatabase);
   res.redirect(`urls/${generateNumbers}`);
 });
 
 //Routes to shortURL
 app.get("/urls/:id", (req, res) => {
-  let templateVars = {
-    shortURL: req.params.id,
-    longURL: urlDatabase[req.params.id].url,
-    user_id: req.session["user_id"]
-  };
+  if(!req.session["user_id"]) {
+    return res.status(401).send("Unauthorized. You need to be logged in.");
+  }
+
   let urlExists = validUrl(req.params.id);
+
   if(urlExists) {
-    if(!req.session["user_id"]) {
-      res.status(401).send("Unauthorized. You need to be logged in.");
-    } else if(req.session["user_id"] !== urlDatabase[req.params.id].userID) {
+    if(req.session["user_id"] !== urlDatabase[req.params.id].userID) {
       res.status(401).send("Unauthorized. User does not match");
     } else {
+      let templateVars = {
+        shortURL: req.params.id,
+        longURL: urlDatabase[req.params.id].url,
+        user_id: req.session["user_id"]
+      };
       res.render("urls_show", templateVars);
     }
+  } else {
     res.status(400).send("Bad Request. That URL does not exist.");
   }
 });
@@ -174,7 +175,6 @@ app.post("/urls/:id/delete", (req, res) => {
     }
   } else {
     res.status(401);
-    // res.send("Error. Unauthorized. User is not logged in.");
     res.redirect('/login');
   }
 });
@@ -191,6 +191,7 @@ app.post("/urls/:id", (req, res) => {
     } else {
       res.redirect('/login');
     }
+  } else {
     res.status(401).send("Unauthorized. User is not logged in.");
   }
 });
@@ -200,10 +201,10 @@ app.post("/login", (req, res) => {
   const userEmail = req.body.email;
   const userPassword = req.body.password;
   const user = findUser(userEmail);
-  if (!user) {
+  if(!user) {
     res.status(403);
     res.send("STATUS 403: User with that e-mail cannot be found");
-  } else if (!bcrypt.compareSync(userPassword, user.password)) {
+  } else if(!bcrypt.compareSync(userPassword, user.password)) {
     res.status(403);
     res.send("STATUS 403: User with that password does not match");
   } else {
@@ -219,7 +220,7 @@ app.get("/login", (req, res) => {
 //Logout
 app.post("/logout", (req, res) => {
   req.session = undefined;
-  res.redirect('/urls');
+  res.redirect('/login');
 });
 
 //Register
@@ -228,16 +229,15 @@ app.get("/register", (req, res) => {
 });
 
 app.post("/register", (req, res) => {
-  // let newId = req.body.user_id;
   let newId = generateRandomString();
   let newEmail = req.body.email;
   let password = req.body.password;
   const hashed_password = bcrypt.hashSync(password, 10);
   const emailDoesExist = emailExists(newEmail);
-  if (!newEmail || !password) {
+  if(!newEmail || !password) {
     res.status(400);
     res.send("STATUS 400: user_id/Password is empty");
-  } else if (emailDoesExist) {
+  } else if(emailDoesExist) {
     res.status(400);
     res.send("STATUS 400: This e-mail already exists");
   }
